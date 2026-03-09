@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Server Dashboard{% endblock %}
+{% block title %}Data Centre Monitoring (DCM){% endblock %}
 
 {% block content %}
 <div class="fade-in">
@@ -8,7 +8,7 @@
     <div>
       <h2 class="mb-2 fw-bold" style="font-size: 1.75rem; color: var(--text-primary);">
         <i class="bi bi-speedometer2 me-2"></i>
-        Server Dashboard
+        Data Centre Monitoring (DCM)
       </h2>
       <p class="mb-0" style="color: var(--text-secondary); font-size: 1rem;">Real-time monitoring and performance analytics</p>
     </div>
@@ -45,15 +45,15 @@
   </div>
 
   <!-- Stats Cards -->
-  <div class="row mb-4 g-3">
-    <div class="col-md-3 col-sm-6">
+  <div class="row mb-3 g-2">
+    <div class="col-md-2 col-sm-6">
       <div class="card bg-gradient-success text-white border-0 shadow-lg metric-card">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center">
             <div>
               <h6 class="card-title mb-1 opacity-90">Total Servers</h6>
               <h2 class="mb-0 fw-bold display-6">{{ total_servers }}</h2>
-              <div class="mt-2">
+              <div class="mt-1">
                 <small class="opacity-75">
                   <i class="bi bi-activity me-1"></i>
                   <span class="online-indicator">{{ online_servers }}</span> online
@@ -67,15 +67,15 @@
         </div>
       </div>
     </div>
-    <div class="col-md-3 col-sm-6">
+    <div class="col-md-2 col-sm-6">
       <div class="card bg-gradient-info text-white border-0 shadow-lg metric-card">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center">
             <div>
               <h6 class="card-title mb-1 opacity-90">Avg CPU</h6>
               <h2 class="mb-0 fw-bold display-6">{{ avg_cpu | round(precision=1) }}%</h2>
-              <div class="mt-2">
-                <div class="progress" style="height: 4px;">
+              <div class="mt-1">
+                <div class="progress" style="height: 3px;">
                   <div class="progress-bar {% if avg_cpu > 85 %}bg-danger{% elif avg_cpu > 65 %}bg-warning{% else %}bg-success{% endif %}" 
                        style="width: {{ avg_cpu }}%"></div>
                 </div>
@@ -88,15 +88,15 @@
         </div>
       </div>
     </div>
-    <div class="col-md-3 col-sm-6">
+    <div class="col-md-2 col-sm-6">
       <div class="card bg-gradient-warning text-white border-0 shadow-lg metric-card">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center">
             <div>
               <h6 class="card-title mb-1 opacity-90">Avg Memory</h6>
               <h2 class="mb-0 fw-bold display-6">{{ avg_memory | round(precision=1) }}%</h2>
-              <div class="mt-2">
-                <div class="progress" style="height: 4px;">
+              <div class="mt-1">
+                <div class="progress" style="height: 3px;">
                   <div class="progress-bar {% if avg_memory > 85 %}bg-danger{% elif avg_memory > 65 %}bg-warning{% else %}bg-info{% endif %}" 
                        style="width: {{ avg_memory }}%"></div>
                 </div>
@@ -109,15 +109,15 @@
         </div>
       </div>
     </div>
-    <div class="col-md-3 col-sm-6">
+    <div class="col-md-2 col-sm-6">
       <div class="card bg-gradient-primary text-white border-0 shadow-lg metric-card">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center">
             <div>
               <h6 class="card-title mb-1 opacity-90">Avg Disk</h6>
               <h2 class="mb-0 fw-bold display-6">{{ avg_disk | round(precision=1) }}%</h2>
-              <div class="mt-2">
-                <div class="progress" style="height: 4px;">
+              <div class="mt-1">
+                <div class="progress" style="height: 3px;">
                   <div class="progress-bar {% if avg_disk > 90 %}bg-danger{% elif avg_disk > 70 %}bg-warning{% else %}bg-light{% endif %}" 
                        style="width: {{ avg_disk }}%"></div>
                 </div>
@@ -130,52 +130,47 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Add Server Form -->
-  <div class="card mb-4 border-0 shadow-lg">
-    <div class="card-header bg-gradient text-white" style="background: var(--primary-gradient);">
-      <h5 class="mb-0">
-        <i class="bi bi-plus-circle me-2"></i>
-        Add New Server
-      </h5>
+    <div class="col-md-2 col-sm-6">
+      <div class="card text-white border-0 shadow-lg metric-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-title mb-1 opacity-90">Emails</h6>
+              <h2 class="mb-0 fw-bold display-6">100K</h2>
+              <div class="mt-1">
+                <small class="opacity-75">
+                  <i class="bi bi-envelope me-1"></i>
+                  <span>Processed daily</span>
+                </small>
+              </div>
+            </div>
+            <div class="fs-1 opacity-75">
+              <i class="bi bi-envelope-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="card-body">
-      <form class="row g-3" method="POST" action="/servers">
-        <div class="col-md-4">
-          <div class="form-floating">
-            <input type="text" name="name" class="form-control" id="serverName" placeholder="Server Name" required>
-            <label for="serverName">
-              <i class="bi bi-tag me-1"></i> Server Name
-            </label>
+    <div class="col-md-2 col-sm-6">
+      <div class="card text-white border-0 shadow-lg metric-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-title mb-1 opacity-90">Domains</h6>
+              <h2 class="mb-0 fw-bold display-6">300</h2>
+              <div class="mt-1">
+                <small class="opacity-75">
+                  <i class="bi bi-globe me-1"></i>
+                  <span>Customers</span>
+                </small>
+              </div>
+            </div>
+            <div class="fs-1 opacity-75">
+              <i class="bi bi-globe"></i>
+            </div>
           </div>
         </div>
-        <div class="col-md-4">
-          <div class="form-floating">
-            <input type="text" name="ip_address" class="form-control" id="serverIp" placeholder="IP Address" required>
-            <label for="serverIp">
-              <i class="bi bi-ethernet me-1"></i> IP Address
-            </label>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-floating">
-            <select class="form-select" id="serverType">
-              <option selected>Production</option>
-              <option>Development</option>
-              <option>Testing</option>
-            </select>
-            <label for="serverType">
-              <i class="bi bi-gear me-1"></i> Server Type
-            </label>
-          </div>
-        </div>
-        <div class="col-md-12">
-          <button type="submit" class="btn btn-gradient text-white px-4 py-2" style="background: var(--success-gradient);">
-            <i class="bi bi-plus-lg me-2"></i> Add Server
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   </div>
 
@@ -328,12 +323,14 @@
                   <a href="/history/{{ server.id }}?period=24h" class="btn btn-outline-primary" title="View History">
                     <i class="bi bi-clock-history"></i>
                   </a>
+                  {% if is_admin %}
                   <a href="/servers/{{ server.id }}/edit" class="btn btn-outline-success" title="Edit Server">
                     <i class="bi bi-pencil"></i>
                   </a>
                   <button class="btn btn-outline-danger" onclick="confirmDeleteServer('{{ server.id }}', '{{ server.name }}')" title="Delete Server">
                     <i class="bi bi-trash"></i>
                   </button>
+                  {% endif %}
                 </div>
               </td>
             </tr>
@@ -353,6 +350,55 @@
       </div>
     </div>
   </div>
+
+  {% if is_admin %}
+  <!-- Add Server Form -->
+  <div class="card mb-4 border-0 shadow-lg">
+    <div class="card-header bg-gradient text-white" style="background: var(--primary-gradient);">
+      <h5 class="mb-0">
+        <i class="bi bi-plus-circle me-2"></i>
+        Add New Server
+      </h5>
+    </div>
+    <div class="card-body">
+      <form class="row g-3" method="POST" action="/servers">
+        <div class="col-md-4">
+          <div class="form-floating">
+            <input type="text" name="name" class="form-control" id="serverName" placeholder="Server Name" required>
+            <label for="serverName">
+              <i class="bi bi-tag me-1"></i> Server Name
+            </label>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-floating">
+            <input type="text" name="ip_address" class="form-control" id="serverIp" placeholder="IP Address" required>
+            <label for="serverIp">
+              <i class="bi bi-ethernet me-1"></i> IP Address
+            </label>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-floating">
+            <select class="form-select" id="serverType">
+              <option selected>Production</option>
+              <option>Development</option>
+              <option>Testing</option>
+            </select>
+            <label for="serverType">
+              <i class="bi bi-gear me-1"></i> Server Type
+            </label>
+          </div>
+        </div>
+        <div class="col-md-12">
+          <button type="submit" class="btn btn-gradient text-white px-4 py-2" style="background: var(--success-gradient);">
+            <i class="bi bi-plus-lg me-2"></i> Add Server
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
 </div>
 
 <style>
@@ -363,25 +409,42 @@
   overflow: hidden;
 }
 
+.metric-card .card-body {
+  padding: 0.75rem 1rem !important;
+}
+
 .metric-card::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 2px;
   background: linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%);
 }
 
 .metric-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .metric-card .display-6 {
-  font-size: 2.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
   text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.metric-card .card-title {
+  font-size: 0.75rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.metric-card small {
+  font-size: 0.7rem !important;
+}
+
+.metric-card .fs-1 {
+  font-size: 2rem !important;
 }
 
 /* Enhanced progress bars */

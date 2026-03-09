@@ -68,9 +68,17 @@ pub struct Alert {
     pub message: String,
     pub current_value: Option<f64>,
     pub threshold_value: Option<f64>,
-    pub is_resolved: bool,
+    #[serde(serialize_with = "serialize_bool")]
+    pub is_resolved: i64, // SQLite stores booleans as integers
     pub created_at: NaiveDateTime,
     pub resolved_at: Option<NaiveDateTime>,
+}
+
+fn serialize_bool<S>(val: &i64, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    serializer.serialize_bool(*val != 0)
 }
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
@@ -81,7 +89,8 @@ pub struct AlertPreference {
     pub memory_threshold: f64,
     pub disk_threshold: f64,
     pub load_threshold: f64,
-    pub enable_notifications: bool,
+    #[serde(serialize_with = "serialize_bool")]
+    pub enable_notifications: i64, // SQLite stores booleans as integers
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
@@ -99,4 +108,33 @@ pub struct AlertSummary {
 pub struct AlertWithServer {
     pub alert: Alert,
     pub server: Server,
+}
+
+#[derive(Debug, Serialize, Deserialize, FromRow, Clone)]
+pub struct User {
+    pub id: String,
+    pub username: String,
+    pub password_hash: String,
+    pub role: String, // 'admin' or 'user'
+    pub full_name: Option<String>,
+    pub email: Option<String>,
+    #[serde(serialize_with = "serialize_bool")]
+    pub is_active: i64, // SQLite stores booleans as integers
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateUserRequest {
+    pub username: String,
+    pub password: String,
+    pub role: String,
+    pub full_name: Option<String>,
+    pub email: Option<String>,
+    pub server_ids: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct AssignServersRequest {
+    pub server_ids: Vec<String>,
 }

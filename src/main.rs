@@ -79,6 +79,11 @@ async fn main() -> std::io::Result<()> {
             .service(routes::get_alert_summary)
             .service(routes::get_alerts_with_servers)
             .service(routes::resolve_alert)
+            .service(routes::admin_users_page)
+            .service(routes::create_user)
+            .service(routes::get_user_servers)
+            .service(routes::assign_servers_to_user)
+            .service(routes::delete_user)
             .wrap(Logger::default())
     })
     .bind(("0.0.0.0", port))?

@@ -11,7 +11,6 @@ use uuid::Uuid;
 use crate::models::{ServerStats, NetdataResponse, Alert, AlertPreference};
 
 const MIN_DISK_USAGE_PERCENT: f64 = 0.0;
-const DEFAULT_DISK_USAGE_PERCENT: f64 = 0.0;
 
 #[derive(Error, Debug)]
 pub enum MetricsError {
@@ -699,7 +698,7 @@ impl MetricsService {
             memory_threshold: 85.0,
             disk_threshold: 90.0,
             load_threshold: 10.0,
-            enable_notifications: true,
+            enable_notifications: 1, // SQLite uses integer for boolean
             created_at: now,
             updated_at: now,
         };
@@ -910,28 +909,6 @@ pub fn parse_disk(chart: &NetdataResponse) -> f64 {
         if total > 0.0 && free > 0.0 {
             let used_calculated = total - free;
             return compute_percent(used_calculated, total);
-        }
-    }
-    0.0
-}
-
-/// Parse network or disk I/O rate (bytes per second)
-pub fn parse_rate(chart: &NetdataResponse) -> f64 {
-    if chart.data.len() >= 2 {
-        let last = &chart.data[chart.data.len() - 1];
-        let prev = &chart.data[chart.data.len() - 2];
-
-        if let (Some(t_last), Some(t_prev)) = (last.get(0).and_then(json_to_f64), prev.get(0).and_then(json_to_f64)) {
-            let dt: f64 = (t_last - t_prev).abs();
-            let mut sum_delta = 0.0;
-
-            for i in 1..chart.labels.len() {
-                if let (Some(a), Some(b)) = (prev.get(i).and_then(json_to_f64), last.get(i).and_then(json_to_f64)) {
-                    sum_delta += (b - a).max(0.0_f64);
-                }
-            }
-
-            return compute_rate(sum_delta, dt);
         }
     }
     0.0

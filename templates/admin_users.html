@@ -1,0 +1,460 @@
+{% extends "base.html" %}
+{% block title %}User Management{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+  <!-- Header Section -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-2 fw-bold" style="font-size: 1.75rem; color: var(--text-primary);">
+        <i class="bi bi-people-fill me-2"></i>
+        User Management
+      </h2>
+      <p class="mb-0" style="color: var(--text-secondary); font-size: 1rem;">Manage users and assign server permissions</p>
+    </div>
+    <div class="d-flex gap-3">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+        <i class="bi bi-plus-circle me-2"></i>Add New User
+      </button>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="card border-0 shadow-lg">
+    <div class="card-header bg-gradient text-white" style="background: var(--primary-gradient);">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+          <i class="bi bi-list-ul me-2"></i>
+          System Users
+        </h5>
+        <div class="d-flex gap-2">
+          <button class="btn btn-light btn-sm" onclick="location.reload()">
+            <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th style="font-size: 1rem;"><i class="bi bi-person me-1"></i> Username</th>
+              <th style="font-size: 1rem;"><i class="bi bi-envelope me-1"></i> Email</th>
+              <th style="font-size: 1rem;"><i class="bi bi-person-badge me-1"></i> Full Name</th>
+              <th style="font-size: 1rem;"><i class="bi bi-shield me-1"></i> Role</th>
+              <th style="font-size: 1rem;"><i class="bi bi-toggle-on me-1"></i> Status</th>
+              <th style="font-size: 1rem;"><i class="bi bi-server me-1"></i> Assigned Servers</th>
+              <th style="font-size: 1rem;"><i class="bi bi-gear me-1"></i> Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-table-body">
+            {% for user in users %}
+            <tr>
+              <td>
+                <div class="fw-bold">{{ user.username }}</div>
+              </td>
+              <td>
+                {% if user.email %}
+                  <span class="text-muted">{{ user.email }}</span>
+                {% else %}
+                  <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if user.full_name %}
+                  {{ user.full_name }}
+                {% else %}
+                  <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if user.role == "admin" %}
+                  <span class="badge bg-danger">
+                    <i class="bi bi-shield-fill me-1"></i>Admin
+                  </span>
+                {% else %}
+                  <span class="badge bg-primary">
+                    <i class="bi bi-person-fill me-1"></i>User
+                  </span>
+                {% endif %}
+              </td>
+              <td>
+                {% if user.is_active %}
+                  <span class="badge bg-success">
+                    <i class="bi bi-check-circle me-1"></i>Active
+                  </span>
+                {% else %}
+                  <span class="badge bg-secondary">
+                    <i class="bi bi-x-circle me-1"></i>Inactive
+                  </span>
+                {% endif %}
+              </td>
+              <td>
+                <button class="btn btn-sm btn-outline-info" onclick="viewUserServers('{{ user.id }}', '{{ user.username }}')">
+                  <i class="bi bi-server me-1"></i>View Servers
+                </button>
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm" role="group">
+                  {% if user.role != "admin" %}
+                  <button class="btn btn-outline-primary" onclick="manageServers('{{ user.id }}', '{{ user.username }}')">
+                    <i class="bi bi-pencil"></i> Assign
+                  </button>
+                  {% endif %}
+                  {% if user.role != "admin" %}
+                  <button class="btn btn-outline-danger" onclick="confirmDeleteUser('{{ user.id }}', '{{ user.username }}')">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center py-5">
+                <div class="text-muted">
+                  <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                  <h5>No users found</h5>
+                  <p>Add your first user to get started</p>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+        <h5 class="modal-title" id="addUserModalLabel">
+          <i class="bi bi-person-plus me-2"></i>Add New User
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addUserForm">
+          <div class="mb-3">
+            <label for="username" class="form-label">Username *</label>
+            <input type="text" class="form-control" id="username" name="username" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password *</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+          <div class="mb-3">
+            <label for="full_name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="full_name" name="full_name">
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email">
+          </div>
+          <div class="mb-3">
+            <label for="role" class="form-label">Role *</label>
+            <select class="form-select" id="role" name="role" required onchange="toggleServerSelection()">
+              <option value="user">User (Limited Access)</option>
+              <option value="admin">Admin (Full Access)</option>
+            </select>
+          </div>
+          <div class="mb-3" id="serverSelection">
+            <label class="form-label">Assign Servers (for User role)</label>
+            <div class="card bg-secondary p-3" style="max-height: 200px; overflow-y: auto;">
+              {% for server in servers %}
+              <div class="form-check">
+                <input class="form-check-input server-checkbox" type="checkbox" value="{{ server.id }}" id="server_{{ server.id }}">
+                <label class="form-check-label" for="server_{{ server.id }}">
+                  {{ server.name }} ({{ server.ip_address }})
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+            <small class="text-muted">Admin users have access to all servers</small>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="submitAddUser()">
+          <i class="bi bi-check-circle me-1"></i>Add User
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Manage Servers Modal -->
+<div class="modal fade" id="manageServersModal" tabindex="-1" aria-labelledby="manageServersModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+        <h5 class="modal-title" id="manageServersModalLabel">
+          <i class="bi bi-server me-2"></i>Manage Server Access
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted">Select servers for user: <strong id="currentUserName">-</strong></p>
+        <div class="card bg-secondary p-3" style="max-height: 300px; overflow-y: auto;">
+          <div id="serverCheckboxes">
+            <!-- Will be populated dynamically -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="submitServerAssignments()">
+          <i class="bi bi-check-circle me-1"></i>Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View User Servers Modal -->
+<div class="modal fade" id="viewServersModal" tabindex="-1" aria-labelledby="viewServersModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+        <h5 class="modal-title" id="viewServersModalLabel">
+          <i class="bi bi-server me-2"></i>Assigned Servers
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted">Servers for user: <strong id="viewUserName">-</strong></p>
+        <div id="serversList" class="list-group">
+          <!-- Will be populated dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-content {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color);
+}
+
+.form-control, .form-select {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: #667eea;
+  color: var(--text-primary);
+  box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+
+.form-check-input {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
+}
+
+.form-check-input:checked {
+  background-color: #667eea;
+  border-color: #667eea;
+}
+</style>
+
+<script>
+let currentUserId = null;
+const servers = {{ servers | json_encode(pretty=false) | safe }};
+
+function toggleServerSelection() {
+  const role = document.getElementById('role').value;
+  const serverSelection = document.getElementById('serverSelection');
+  serverSelection.style.display = role === 'user' ? 'block' : 'none';
+}
+
+async function submitAddUser() {
+  const form = document.getElementById('addUserForm');
+  const formData = new FormData(form);
+  
+  const role = formData.get('role');
+  const serverIds = [];
+  
+  if (role === 'user') {
+    document.querySelectorAll('.server-checkbox:checked').forEach(checkbox => {
+      serverIds.push(checkbox.value);
+    });
+  }
+  
+  const userData = {
+    username: formData.get('username'),
+    password: formData.get('password'),
+    full_name: formData.get('full_name') || null,
+    email: formData.get('email') || null,
+    role: role,
+    server_ids: serverIds
+  };
+  
+  try {
+    const response = await fetch('/admin/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userData)
+    });
+    
+    if (response.ok) {
+      alert('User created successfully!');
+      location.reload();
+    } else {
+      const error = await response.json();
+      alert('Failed to create user: ' + (error.error || 'Unknown error'));
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to create user. Please try again.');
+  }
+}
+
+async function manageServers(userId, username) {
+  currentUserId = userId;
+  document.getElementById('currentUserName').textContent = username;
+  
+  // Load user's current servers
+  try {
+    const response = await fetch(`/admin/users/${userId}/servers`);
+    const assignedServerIds = await response.json();
+    
+    // Populate checkboxes
+    const container = document.getElementById('serverCheckboxes');
+    container.innerHTML = '';
+    
+    servers.forEach(server => {
+      const isChecked = assignedServerIds.includes(server.id);
+      container.innerHTML += `
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="${server.id}" id="manage_server_${server.id}" ${isChecked ? 'checked' : ''}>
+          <label class="form-check-label" for="manage_server_${server.id}">
+            ${server.name} (${server.ip_address})
+          </label>
+        </div>
+      `;
+    });
+    
+    const modal = new bootstrap.Modal(document.getElementById('manageServersModal'));
+    modal.show();
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to load server assignments');
+  }
+}
+
+async function submitServerAssignments() {
+  const serverIds = [];
+  document.querySelectorAll('#serverCheckboxes .form-check-input:checked').forEach(checkbox => {
+    serverIds.push(checkbox.value);
+  });
+  
+  try {
+    const response = await fetch(`/admin/users/${currentUserId}/servers`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ server_ids: serverIds })
+    });
+    
+    if (response.ok) {
+      alert('Server assignments updated successfully!');
+      location.reload();
+    } else {
+      alert('Failed to update server assignments');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to update server assignments');
+  }
+}
+
+async function viewUserServers(userId, username) {
+  document.getElementById('viewUserName').textContent = username;
+  
+  try {
+    const response = await fetch(`/admin/users/${userId}/servers`);
+    const assignedServerIds = await response.json();
+    
+    const container = document.getElementById('serversList');
+    container.innerHTML = '';
+    
+    if (assignedServerIds.length === 0) {
+      container.innerHTML = '<div class="alert alert-info">No servers assigned to this user</div>';
+    } else {
+      assignedServerIds.forEach(serverId => {
+        const server = servers.find(s => s.id === serverId);
+        if (server) {
+          container.innerHTML += `
+            <div class="list-group-item bg-secondary text-light">
+              <i class="bi bi-server me-2"></i>${server.name} <small class="text-muted">(${server.ip_address})</small>
+            </div>
+          `;
+        }
+      });
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('viewServersModal'));
+    modal.show();
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to load server assignments');
+  }
+}
+
+async function confirmDeleteUser(userId, username) {
+  if (confirm(`Are you sure you want to delete user "${username}"?`)) {
+    try {
+      const response = await fetch(`/admin/users/${userId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        alert('User deleted successfully!');
+        location.reload();
+      } else {
+        alert('Failed to delete user');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to delete user');
+    }
+  }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+  toggleServerSelection();
+});
+</script>
+{% endblock %}
