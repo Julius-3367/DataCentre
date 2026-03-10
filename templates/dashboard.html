@@ -944,7 +944,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(loadAlerts, 30000);
 });
 
-// Auto refresh every 30 seconds to pick up new metrics from the server
-setInterval(function() { location.reload(); }, 30000);
+// Auto refresh every 60 seconds (1 minute) to pick up new metrics from the server
+setInterval(function() { location.reload(); }, 60000);
 </script>
 {% endblock %}
